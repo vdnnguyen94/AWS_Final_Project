@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RescueLink.API", "RescueLink.API\RescueLink.API.csproj", "{3F6381DB-8B00-498E-A0C6-2A4DDD154A38}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F6381DB-8B00-498E-A0C6-2A4DDD154A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F6381DB-8B00-498E-A0C6-2A4DDD154A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F6381DB-8B00-498E-A0C6-2A4DDD154A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F6381DB-8B00-498E-A0C6-2A4DDD154A38}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {12C5B485-CAA3-4C1A-B44B-9B8B3C0C8389}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,55 @@
+# ===============================================================
+# A) General / Operating System / IDE
+# ===============================================================
+.DS_Store
+Thumbs.db
+*.log
+.npm/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/!(settings.json)
+*.user
+*.suo
+
+# ===============================================================
+# B) .NET Backend (in /backend/)
+# ===============================================================
+# Compiled output
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+# Generated files
+*.Generated.cs
+*.Generated.vb
+_Resharper.*/
+
+# IMPORTANT: Ignore the backend .env file
+# (This path assumes your .env is inside your .Api project folder)
+backend/RescueLink/RescueLink.Api/.env
+
+# ===============================================================
+# C) React Frontend (in /frontend/)
+# ===============================================================
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Build/dist output
+dist/
+build/
+.output/
+.vite-inspect/
+
+# IMPORTANT: Ignore the frontend .env file
+# (This path assumes your .env is inside your client project folder)
+frontend/rescuelink-client/.env.local
+frontend/rescuelink-client/.env.*.local
