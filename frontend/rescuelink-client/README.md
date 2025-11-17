@@ -1,16 +1,287 @@
-# React + Vite
+# 📘 RescueLink Frontend – README
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A complete React (Vite) frontend application for the **RescueLink Disaster Reporting System**.
+This frontend communicates with a REST API and provides UI screens for:
 
-Currently, two official plugins are available:
+* Incidents
+* Users
+* Media (uploads)
+* Google Maps visualization
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The goal is to offer a clean UI that demonstrates all REST operations (GET, POST, PUT, PATCH, DELETE).
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 1. Tech Stack
 
-## Expanding the ESLint configuration
+* **React 18 (Vite)**
+* **React Router v6**
+* **Axios** (API communication)
+* **@react-google-maps/api** (Map integration)
+* **CSS Modules / Basic Styling**
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 📦 2. Install Dependencies
+
+```bash
+cd rescuelink-client
+npm install
+```
+
+This installs:
+
+* axios
+* react-router-dom
+* @react-google-maps/api
+* Vite dependencies
+
+---
+
+## ⚙️ 3. Environment Variables
+
+Create a file named:
+
+```
+rescuelink-client/.env.local
+```
+
+Add the following:
+
+```bash
+# Local ASP.NET API URL (example)
+VITE_API_BASE_URL=https://localhost:7123
+
+# Google Maps API Key
+VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
+```
+
+> ⚠️ Must be `.env.local`
+> ⚠️ All variables are accessed via `import.meta.env.*`
+
+---
+
+## ▶️ 4. Run the App
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Visit:
+
+👉 **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+## 📂 5. Frontend Folder Structure
+
+```
+src/
+├── api/
+│   ├── axiosClient.js
+│   ├── incidentsApi.js
+│   ├── usersApi.js
+│   └── mediaApi.js
+│
+├── pages/
+│   ├── Incidents/
+│   │   ├── IncidentList.jsx
+│   │   ├── IncidentDetail.jsx
+│   │   └── IncidentForm.jsx
+│   │
+│   ├── Users/
+│   │   ├── UserList.jsx
+│   │   ├── UserDetail.jsx
+│   │   └── UserForm.jsx
+│   │
+│   ├── Media/
+│   │   ├── MediaList.jsx
+│   │   └── MediaUpload.jsx
+│   │
+│   └── Map/
+│       └── IncidentMap.jsx
+│
+├── App.jsx
+├── App.css
+├── index.css
+└── main.jsx
+```
+
+---
+
+## 🔌 6. API Layer Overview
+
+### ✔ Shared Axios Instance
+
+`src/api/axiosClient.js`
+
+```js
+import axios from "axios";
+
+const axiosClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+});
+
+axiosClient.interceptors.request.use((config) => {
+  config.headers["Accept"] = "application/json";
+  config.headers["Content-Type"] = "application/json";
+  return config;
+});
+
+export default axiosClient;
+```
+
+---
+
+### ✔ Example API Wrapper (Incidents)
+
+`src/api/incidentsApi.js`
+
+```js
+import axiosClient from "./axiosClient";
+
+const incidentsApi = {
+  getAll: () => axiosClient.get("/api/incidents"),
+  getById: (id) => axiosClient.get(`/api/incidents/${id}`),
+  create: (data) => axiosClient.post("/api/incidents", data),
+  update: (id, data) => axiosClient.put(`/api/incidents/${id}`, data),
+  patchStatus: (id, status) =>
+    axiosClient.patch(`/api/incidents/${id}`, { status }),
+  delete: (id) => axiosClient.delete(`/api/incidents/${id}`),
+};
+
+export default incidentsApi;
+```
+
+API wrappers for Users and Media follow the same pattern.
+
+---
+
+## 🖥️ 7. Frontend Features
+
+### ✔ Incidents (Full CRUD + Search + Filters)
+
+* View all incidents
+* Filter by status (Open / InProgress / Resolved)
+* Search by title/description/id
+* Create incident
+* Edit incident
+* Delete incident
+* PATCH status update
+* Detail page for each incident
+
+### ✔ Users (Full CRUD)
+
+* List all users
+* Add/edit users
+* Delete users
+* View details
+* PATCH user role
+
+### ✔ Media (Upload + List + Delete)
+
+* Upload image or video
+* Attach to a specific Incident
+* View uploaded file URL
+* Delete media
+
+### ✔ Google Maps Integration
+
+* Show incidents as map markers
+* Filter/search incidents
+* Click markers to view quick info
+
+---
+
+## 🗺️ 8. Google Maps Example
+
+`src/pages/Map/IncidentMap.jsx`
+
+```jsx
+<GoogleMap
+  mapContainerStyle={{ width: "100%", height: "500px" }}
+  center={{ lat: 43.65107, lng: -79.347015 }}
+  zoom={10}
+>
+  {filteredIncidents.map((inc) =>
+    inc.latitude && inc.longitude ? (
+      <Marker
+        key={inc.id}
+        position={{ lat: inc.latitude, lng: inc.longitude }}
+        title={inc.title}
+      />
+    ) : null
+  )}
+</GoogleMap>
+```
+
+---
+
+## 🧪 9. How to Demo the Frontend
+
+### **1) Incidents**
+
+1. Create a new incident
+2. Edit incident fields
+3. Change status (PATCH)
+4. Search “fire” or “flood”
+5. Filter by status
+6. Delete incident
+
+### **2) Users**
+
+1. Create user
+2. Edit user email/role
+3. Change role using PATCH
+4. Delete user
+
+### **3) Media**
+
+1. Upload media
+2. Show file URL
+3. Delete media
+
+### **4) Map**
+
+1. Open map page
+2. Show markers
+3. Apply filter/search
+4. Demonstrate dynamic marker updates
+
+---
+
+## 🛠️ 10. Build for Production
+
+```bash
+npm run build
+```
+
+Output:
+
+```
+dist/
+```
+
+---
+
+
+## 🔧 Mock API (Temporary)
+
+For development convenience, this project includes a small **in-memory Mock API** inside the `src/api` files.
+When enabled, all API calls for **Incidents, Users, and Media** run entirely on the frontend without any backend.
+
+Enable mock mode:
+
+```bash
+VITE_USE_MOCK_API=true
+```
+
+Disable mock mode (use real backend):
+
+```bash
+VITE_USE_MOCK_API=false
+```
+
+This mock layer is **temporary** and will be removed once the real backend API is fully ready.
