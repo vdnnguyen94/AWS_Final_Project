@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import mediaApi from "../../api/mediaApi";
 
@@ -6,6 +6,8 @@ function MediaList() {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [searchText, setSearchText] = useState("");
+
   const navigate = useNavigate();
 
   const loadMedia = async () => {
@@ -38,6 +40,22 @@ function MediaList() {
     }
   };
 
+  const filteredMedia = useMemo(() => {
+    if (!searchText.trim()) return media;
+
+    const keyword = searchText.toLowerCase();
+    return media.filter((m) => {
+      const desc = (m.description || "").toLowerCase();
+      const url = (m.url || "").toLowerCase();
+      return (
+        String(m.id).includes(keyword) ||
+        String(m.incidentId).includes(keyword) ||
+        desc.includes(keyword) ||
+        url.includes(keyword)
+      );
+    });
+  }, [media, searchText]);
+
   if (loading) return <p>Loading media...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -45,34 +63,72 @@ function MediaList() {
     <div>
       <h2>Media</h2>
 
-      <button onClick={() => navigate("/media/upload")}>+ Upload Media</button>
+      <div className="filter-row">
+        <div className="filter-left">
+          <input
+            type="text"
+            placeholder="Search media by id, incident, description..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </div>
 
-      {media.length === 0 ? (
+        <div className="filter-right">
+          <button onClick={() => navigate("/media/upload")}>
+            + Upload Media
+          </button>
+        </div>
+      </div>
+
+      {filteredMedia.length === 0 ? (
         <p>No media found.</p>
       ) : (
-        <table>
+        <table className="data-table">
           <thead>
             <tr>
               <th>Id</th>
               <th>Incident Id</th>
               <th>Description</th>
-              <th>Url</th>
-              <th>Actions</th>
+              <th>File</th>
+              <th className="table-actions-header">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {media.map((m) => (
+            {filteredMedia.map((m) => (
               <tr key={m.id}>
                 <td>{m.id}</td>
                 <td>{m.incidentId}</td>
                 <td>{m.description}</td>
                 <td>
-                  <a href={m.url} target="_blank" rel="noreferrer">
-                    Open
-                  </a>
+                  {m.url ? (
+                    <a href={m.url} target="_blank" rel="noreferrer">
+                      Open
+                    </a>
+                  ) : (
+                    "-"
+                  )}
                 </td>
-                <td>
-                  <button onClick={() => handleDelete(m.id)}>Delete</button>
+                <td className="table-actions-cell">
+                  <div className="action-buttons">
+                    <button
+                      className="btn-pill btn-view"
+                      onClick={() => navigate(`/media/${m.id}`)}
+                    >
+                      View
+                    </button>
+                    <button
+                      className="btn-pill btn-edit"
+                      onClick={() => navigate(`/media/${m.id}/edit`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn-pill btn-delete"
+                      onClick={() => handleDelete(m.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

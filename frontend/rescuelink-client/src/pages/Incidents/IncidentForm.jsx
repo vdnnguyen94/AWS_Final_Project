@@ -20,7 +20,6 @@ function IncidentForm({ mode }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // when editing mode, load the current data
   useEffect(() => {
     if (!isEdit || !id) return;
 
@@ -51,10 +50,7 @@ function IncidentForm({ mode }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -62,7 +58,6 @@ function IncidentForm({ mode }) {
     setSaving(true);
     setError("");
 
-    // change the number field to 'number' (if backend is double/float)
     const payload = {
       ...form,
       latitude: form.latitude ? Number(form.latitude) : null,
@@ -70,11 +65,8 @@ function IncidentForm({ mode }) {
     };
 
     try {
-      if (isEdit) {
-        await incidentsApi.update(id, payload);
-      } else {
-        await incidentsApi.create(payload);
-      }
+      if (isEdit) await incidentsApi.update(id, payload);
+      else await incidentsApi.create(payload);
 
       navigate("/incidents");
     } catch (err) {
@@ -89,88 +81,102 @@ function IncidentForm({ mode }) {
 
   return (
     <div>
-      <h2>{isEdit ? "Edit Incident" : "New Incident"}</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      <div className="detail-card">
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: "400px" }}>
-        <div>
-          <label>
-            Title
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              required
-            />
-          </label>
+        <div className="detail-top-row">
+          <div className="detail-section-title">
+            <h2>{isEdit ? "Edit Incident" : "New Incident"}</h2>
+          </div>
         </div>
 
-        <div>
-          <label>
-            Description
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              rows={4}
-            />
-          </label>
-        </div>
+        {error && <p className="form-error">{error}</p>}
 
-        <div>
-          <label>
-            Status
-            <select
-              name="status"
-              value={form.status}
-              onChange={handleChange}
+        <form onSubmit={handleSubmit} className="form-layout form-fullwidth">
+
+          <div>
+            <label>
+              Title
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                required
+              />
+            </label>
+          </div>
+
+          <div>
+            <label>
+              Description
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows={4}
+              />
+            </label>
+          </div>
+
+          <div className="form-row-two">
+            <div>
+              <label>
+                Status
+                <select
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                >
+                  <option value="Open">Open</option>
+                  <option value="InProgress">InProgress</option>
+                  <option value="Resolved">Resolved</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className="form-row-two">
+            <div>
+              <label>
+                Latitude
+                <input
+                  name="latitude"
+                  type="number"
+                  step="0.000001"
+                  value={form.latitude}
+                  onChange={handleChange}
+                />
+              </label>
+            </div>
+            <div>
+              <label>
+                Longitude
+                <input
+                  name="longitude"
+                  type="number"
+                  step="0.000001"
+                  value={form.longitude}
+                  onChange={handleChange}
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={() => navigate("/incidents")}
+              disabled={saving}
+              className="btn-secondary"
             >
-              <option value="Open">Open</option>
-              <option value="InProgress">InProgress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-          </label>
-        </div>
+              Cancel
+            </button>
+            <button type="submit" disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
 
-        <div>
-          <label>
-            Latitude
-            <input
-              name="latitude"
-              type="number"
-              step="0.000001"
-              value={form.latitude}
-              onChange={handleChange}
-            />
-          </label>
-        </div>
-
-        <div>
-          <label>
-            Longitude
-            <input
-              name="longitude"
-              type="number"
-              step="0.000001"
-              value={form.longitude}
-              onChange={handleChange}
-            />
-          </label>
-        </div>
-
-        <div style={{ marginTop: "12px" }}>
-          <button type="submit" disabled={saving}>
-            {saving ? "Saving..." : "Save"}
-          </button>{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/incidents")}
-            disabled={saving}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

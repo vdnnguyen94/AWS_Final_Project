@@ -1,60 +1,123 @@
-/*import axiosClient from "./axiosClient";
+// ===== Real mediaApi (for backend connection) =====
+import axiosClient from "./axiosClient";
 
 const mediaApi = {
+  // GET /api/media
   getAll: () => axiosClient.get("/api/media"),
+
+  // GET /api/media/{id}
   getById: (id) => axiosClient.get(`/api/media/${id}`),
 
-  // JSON-based create/update (if backend supports it)
+  // POST /api/media
+  // body: { incidentId, description, url } OR JSON, not FormData
   create: (data) => axiosClient.post("/api/media", data),
+
+  // PUT /api/media/{id}
+  // body: { incidentId, description, url }
   update: (id, data) => axiosClient.put(`/api/media/${id}`, data),
+
+  // DELETE /api/media/{id}
   delete: (id) => axiosClient.delete(`/api/media/${id}`),
 
-  // File upload using multipart/form-data
+  // File upload (multipart/form-data)
+  // FormData: incidentId, description, file
   uploadFile: (formData) =>
-    axiosClient.post("/api/media/upload", formData, { // confirm with backend if the endpoint is '/api/media' or /api/media/upload'
+    axiosClient.post("/api/media", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
 };
 
-export default mediaApi;*/
+export default mediaApi; 
 
-/* ------------------- Mock mediaApi ------------------- */
-
-import axiosClient from "./axiosClient";
-
-const useMock = import.meta.env.VITE_USE_MOCK_API === "true";
+/*/ ===== Mock mediaApi (For frontend testing) =====
+const delay = (data, ms = 300) =>
+  new Promise((resolve) => setTimeout(() => resolve({ data }), ms));
 
 let mockMedia = [
   {
     id: 1,
     incidentId: 1,
-    description: "Photo of power outage area",
-    url: "https://via.placeholder.com/150",
+    description: "Photo: Power outage area - transformer damage",
+    url: "https://via.placeholder.com/320x220.png?text=Outage+Photo",
+    uploadedAt: "2025-11-01T10:00:00Z",
   },
   {
     id: 2,
     incidentId: 2,
-    description: "Flood video clip",
-    url: "https://www.example.com/video.mp4",
+    description: "Video: Flood water rising rapidly",
+    url: "https://www.example.com/video1.mp4",
+    uploadedAt: "2025-11-02T14:30:00Z",
+  },
+  {
+    id: 3,
+    incidentId: 3,
+    description: "Photo: Car collision on highway",
+    url: "https://via.placeholder.com/320x220.png?text=Collision",
+    uploadedAt: "2025-11-03T09:15:00Z",
+  },
+  {
+    id: 4,
+    incidentId: 4,
+    description: "Photo: Subway track blockage",
+    url: "https://via.placeholder.com/320x220.png?text=Subway+Issue",
+    uploadedAt: "2025-11-04T11:45:00Z",
+  },
+  {
+    id: 5,
+    incidentId: 5,
+    description: "Video: Industrial fire smoke observed",
+    url: "https://www.example.com/video2.mp4",
+    uploadedAt: "2025-11-05T16:20:00Z",
+  },
+  {
+    id: 6,
+    incidentId: 6,
+    description: "Photo: Gas leak investigation team",
+    url: "https://via.placeholder.com/320x220.png?text=Gas+Leak",
+    uploadedAt: "2025-11-06T08:10:00Z",
+  },
+  {
+    id: 7,
+    incidentId: 7,
+    description: "Photo: Road closure barrier",
+    url: "https://via.placeholder.com/320x220.png?text=Road+Closure",
+    uploadedAt: "2025-11-07T13:05:00Z",
+  },
+  {
+    id: 8,
+    incidentId: 8,
+    description: "Photo: Traffic signal outage — technician on site",
+    url: "https://via.placeholder.com/320x220.png?text=Traffic+Outage",
+    uploadedAt: "2025-11-08T19:40:00Z",
   },
 ];
 
-let mockNextId = 3;
+let mockNextId = 9;
 
-const delay = (data, ms = 300) =>
-  new Promise((resolve) => setTimeout(() => resolve({ data }), ms));
-
-const mockMediaApi = {
+const mediaApi = {
   getAll: () => delay([...mockMedia]),
-  getById: (id) => delay(mockMedia.find((m) => m.id === Number(id)) ?? null),
+
+  getById: (id) =>
+    delay(mockMedia.find((m) => m.id === Number(id)) ?? null),
 
   create: (data) => {
+    const incidentIdRaw = data.incidentId;
+    const incidentIdStr =
+      typeof incidentIdRaw === "string" ? incidentIdRaw.trim() : incidentIdRaw;
+
+    const nowIso = new Date().toISOString();
+
     const newItem = {
       id: mockNextId++,
-      incidentId: Number(data.incidentId),
+      incidentId:
+        incidentIdStr !== undefined && incidentIdStr !== ""
+          ? Number(incidentIdStr)
+          : null,
       description: data.description ?? "",
-      url: data.url ?? "https://via.placeholder.com/150",
+      url: data.url ?? "https://via.placeholder.com/300x200.png?text=Media",
+      uploadedAt: nowIso,
     };
+
     mockMedia.push(newItem);
     return delay(newItem);
   },
@@ -63,11 +126,24 @@ const mockMediaApi = {
     const index = mockMedia.findIndex((m) => m.id === Number(id));
     if (index === -1) return delay(null);
 
-    mockMedia[index] = {
+    const updated = {
       ...mockMedia[index],
       ...data,
-      id: mockMedia[index].id,
     };
+
+    if (data.incidentId !== undefined) {
+      const str =
+        typeof data.incidentId === "string"
+          ? data.incidentId.trim()
+          : data.incidentId;
+
+      updated.incidentId =
+        str !== "" && str !== null && str !== undefined
+          ? Number(str)
+          : null;
+    }
+
+    mockMedia[index] = updated;
     return delay(mockMedia[index]);
   },
 
@@ -76,22 +152,31 @@ const mockMediaApi = {
     return delay(null);
   },
 
-  // Simulated file upload: we just store metadata and fake URL
   uploadFile: (formData) => {
-    const incidentId = Number(formData.get("incidentId"));
+    const incidentIdRaw = formData.get("incidentId");
+    const incidentIdStr =
+      typeof incidentIdRaw === "string" ? incidentIdRaw.trim() : incidentIdRaw;
+
+    const incidentId =
+      incidentIdStr !== null && incidentIdStr !== ""
+        ? Number(incidentIdStr)
+        : null;
+
     const description = formData.get("description") ?? "";
     const file = formData.get("file");
+    const nowIso = new Date().toISOString();
 
     const fakeUrl =
-      typeof file === "object"
-        ? `https://example.com/uploads/${file.name}`
-        : "https://via.placeholder.com/150";
+      file && typeof file === "object" && "name" in file
+        ? `https://placehold.co/600x400/png?text=${encodeURIComponent(file.name)}`
+        : "https://placehold.co/600x400/png?text=Uploaded+Media";
 
     const newItem = {
       id: mockNextId++,
       incidentId,
       description,
       url: fakeUrl,
+      uploadedAt: nowIso,
     };
 
     mockMedia.push(newItem);
@@ -99,19 +184,4 @@ const mockMediaApi = {
   },
 };
 
-// Real API implementation
-const realMediaApi = {
-  getAll: () => axiosClient.get("/api/media"),
-  getById: (id) => axiosClient.get(`/api/media/${id}`),
-  create: (data) => axiosClient.post("/api/media", data),
-  update: (id, data) => axiosClient.put(`/api/media/${id}`, data),
-  delete: (id) => axiosClient.delete(`/api/media/${id}`),
-  uploadFile: (formData) =>
-    axiosClient.post("/api/media", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
-};
-
-const mediaApi = useMock ? mockMediaApi : realMediaApi;
-
-export default mediaApi;
+export default mediaApi; */

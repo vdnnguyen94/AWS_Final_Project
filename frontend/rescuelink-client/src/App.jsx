@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink } from "react-router-dom";
+import { Routes, Route, NavLink, Link } from "react-router-dom";
 import "./App.css";
 
 import IncidentList from "./pages/Incidents/IncidentList.jsx";
@@ -11,6 +11,8 @@ import UserDetail from "./pages/Users/UserDetail.jsx";
 
 import MediaList from "./pages/Media/MediaList.jsx";
 import MediaUpload from "./pages/Media/MediaUpload.jsx";
+import MediaDetail from "./pages/Media/MediaDetail.jsx";
+import MediaForm from "./pages/Media/MediaForm.jsx";
 
 import IncidentMap from "./pages/Map/IncidentMap.jsx";
 
@@ -18,7 +20,11 @@ function App() {
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>RescueLink</h1>
+        <h1>
+          <Link to="/" className="home-title-link">
+            RescueLink
+          </Link>
+        </h1>
         <nav>
           <NavLink to="/incidents">Incidents</NavLink>
           <NavLink to="/users">Users</NavLink>
@@ -48,6 +54,8 @@ function App() {
             {/* Media routes */}
             <Route path="/media" element={<MediaList />} />
             <Route path="/media/upload" element={<MediaUpload />} />
+            <Route path="/media/:id" element={<MediaDetail />} />
+            <Route path="/media/:id/edit" element={<MediaForm mode="edit" />} />
 
             {/* Map */}
             <Route path="/map" element={<IncidentMap />} />

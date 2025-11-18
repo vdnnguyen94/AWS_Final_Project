@@ -78,33 +78,37 @@ function IncidentList() {
     <div>
       <h2>Incidents</h2>
 
-      <div className="filter-bar">
-        <button onClick={() => navigate("/incidents/new")}>
-          + New Incident
-        </button>
+      <div className="filter-row">
+        <div className="filter-left">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All statuses</option>
+            <option value="Open">Open</option>
+            <option value="InProgress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">All statuses</option>
-          <option value="Open">Open</option>
-          <option value="InProgress">In Progress</option>
-          <option value="Resolved">Resolved</option>
-        </select>
+          <input
+            type="text"
+            placeholder="Search incidents..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search by id, title, description..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
+        <div className="filter-right">
+          <button onClick={() => navigate("/incidents/new")}>
+            + New Incident
+          </button>
+        </div>
       </div>
 
       {filteredIncidents.length === 0 ? (
         <p>No incidents found.</p>
       ) : (
-        <table>
+        <table className="data-table">
           <thead>
             <tr>
               <th>Id</th>
@@ -112,7 +116,7 @@ function IncidentList() {
               <th>Status</th>
               <th>Latitude</th>
               <th>Longitude</th>
-              <th>Actions</th>
+              <th className="table-actions-header">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -123,16 +127,27 @@ function IncidentList() {
                 <td>{inc.status}</td>
                 <td>{inc.latitude}</td>
                 <td>{inc.longitude}</td>
-                <td>
-                  <button onClick={() => navigate(`/incidents/${inc.id}`)}>
-                    View
-                  </button>{" "}
-                  <button
-                    onClick={() => navigate(`/incidents/${inc.id}/edit`)}
-                  >
-                    Edit
-                  </button>{" "}
-                  <button onClick={() => handleDelete(inc.id)}>Delete</button>
+                <td className="table-actions-cell">
+                  <div className="action-buttons">
+                    <button
+                      className="btn-pill btn-view"
+                      onClick={() => navigate(`/incidents/${inc.id}`)}
+                    >
+                      View
+                    </button>
+                    <button
+                      className="btn-pill btn-edit"
+                      onClick={() => navigate(`/incidents/${inc.id}/edit`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn-pill btn-delete"
+                      onClick={() => handleDelete(inc.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

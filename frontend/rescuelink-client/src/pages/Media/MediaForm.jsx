@@ -1,48 +1,43 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import usersApi from "../../api/usersApi";
+import mediaApi from "../../api/mediaApi";
 
-const emptyForm = {
-  name: "",
-  email: "",
-  role: "Responder",
-};
-
-function UserForm({ mode }) {
-  const navigate = useNavigate();
+function MediaForm() {
   const { id } = useParams();
-  const isEdit = mode === "edit";
+  const navigate = useNavigate();
 
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState({
+    incidentId: "",
+    description: "",
+  });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!isEdit || !id) return;
-
-    const fetchUser = async () => {
+    const loadMedia = async () => {
       try {
         setLoading(true);
         setError("");
-        const res = await usersApi.getById(id);
+        const res = await mediaApi.getById(id);
         const data = res.data;
 
         setForm({
-          name: data.name ?? "",
-          email: data.email ?? "",
-          role: data.role ?? "Responder",
+          incidentId: data.incidentId ?? "",
+          description: data.description ?? "",
         });
       } catch (err) {
         console.error(err);
-        setError("Failed to load user.");
+        setError("Failed to load media item.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
-  }, [isEdit, id]);
+    if (id) {
+      loadMedia();
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,12 +53,12 @@ function UserForm({ mode }) {
     setError("");
 
     try {
-      if (isEdit) {
-        await usersApi.update(id, form);
-      } else {
-        await usersApi.create(form);
-      }
-      navigate("/users");
+      const payload = {
+        description: form.description,
+      };
+
+      await mediaApi.update(id, payload);
+      navigate(`/media/${id}`);
     } catch (err) {
       console.error(err);
       setError("Save failed.");
@@ -72,14 +67,14 @@ function UserForm({ mode }) {
     }
   };
 
-  if (loading) return <p>Loading user...</p>;
+  if (loading) return <p>Loading media...</p>;
 
   return (
     <div>
       <div className="detail-card">
         <div className="detail-top-row">
           <div className="detail-section-title">
-            <h2>{isEdit ? "Edit User" : "New User"}</h2>
+            <h2>Edit Media</h2>
           </div>
         </div>
 
@@ -88,44 +83,31 @@ function UserForm({ mode }) {
         <form onSubmit={handleSubmit} className="form-layout form-fullwidth">
           <div>
             <label>
-              Name
+              Incident Id
               <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
+                name="incidentId"
+                value={form.incidentId}
+                readOnly
               />
             </label>
           </div>
 
           <div>
             <label>
-              Email
-              <input
-                name="email"
-                type="email"
-                value={form.email}
+              Description
+              <textarea
+                name="description"
+                rows={3}
+                value={form.description}
                 onChange={handleChange}
-                required
               />
-            </label>
-          </div>
-
-          <div>
-            <label>
-              Role
-              <select name="role" value={form.role} onChange={handleChange}>
-                <option value="Responder">Responder</option>
-                <option value="Dispatcher">Dispatcher</option>
-                <option value="Admin">Admin</option>
-              </select>
             </label>
           </div>
 
           <div className="form-actions">
             <button
               type="button"
-              onClick={() => navigate("/users")}
+              onClick={() => navigate(`/media/${id}`)}
               disabled={saving}
               className="btn-secondary"
             >
@@ -141,4 +123,4 @@ function UserForm({ mode }) {
   );
 }
 
-export default UserForm;
+export default MediaForm;

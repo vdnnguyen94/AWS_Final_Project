@@ -18,8 +18,14 @@ function MediaUpload() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!file) {
       alert("Please choose a file.");
+      return;
+    }
+
+    if (!incidentId.trim()) {
+      alert("Please enter an incident id.");
       return;
     }
 
@@ -28,9 +34,9 @@ function MediaUpload() {
 
     try {
       const formData = new FormData();
-      formData.append("incidentId", incidentId);
+      formData.append("incidentId", incidentId.trim());
       formData.append("description", description);
-      formData.append("file", file); // field name should match backend
+      formData.append("file", file); // backend should expect the field name 'file'
 
       await mediaApi.uploadFile(formData);
       navigate("/media");
@@ -44,52 +50,64 @@ function MediaUpload() {
 
   return (
     <div>
-      <h2>Upload Media</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <form onSubmit={handleSubmit} style={{ maxWidth: "400px" }}>
-        <div>
-          <label>
-            Incident Id
-            <input
-              value={incidentId}
-              onChange={(e) => setIncidentId(e.target.value)}
-              required
-            />
-          </label>
+      <div className="detail-card">
+        <div className="detail-top-row">
+          <div className="detail-section-title">
+            <h2>Upload Media</h2>
+          </div>
         </div>
 
-        <div>
-          <label>
-            Description
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
-          </label>
-        </div>
+        {error && <p className="form-error">{error}</p>}
 
-        <div>
-          <label>
-            File
-            <input type="file" onChange={handleFileChange} required />
-          </label>
-        </div>
+        <form onSubmit={handleSubmit} className="form-layout form-fullwidth">
+          <div>
+            <label>
+              Incident Id
+              <input
+                value={incidentId}
+                onChange={(e) => setIncidentId(e.target.value)}
+                required
+              />
+            </label>
+          </div>
 
-        <div style={{ marginTop: "12px" }}>
-          <button type="submit" disabled={uploading}>
-            {uploading ? "Uploading..." : "Upload"}
-          </button>{" "}
-          <button
-            type="button"
-            onClick={() => navigate("/media")}
-            disabled={uploading}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+          <div>
+            <label>
+              Description
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </label>
+          </div>
+
+          <div>
+            <label>
+              File
+              <input
+                type="file"
+                onChange={handleFileChange}
+                required
+              />
+            </label>
+          </div>
+
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={() => navigate("/media")}
+              disabled={uploading}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" disabled={uploading}>
+              {uploading ? "Uploading..." : "Upload"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

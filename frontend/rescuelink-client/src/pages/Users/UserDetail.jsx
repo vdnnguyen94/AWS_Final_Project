@@ -51,46 +51,86 @@ function UserDetail() {
 
   return (
     <div>
-      <h2>User Detail</h2>
+      <div className="detail-card">
+        <div className="detail-top-row">
+          <div className="detail-section-title">
+            <h2>User Detail</h2>
+          </div>
+          <div className="detail-actions detail-actions-right">
+            <button onClick={() => navigate(`/users/${id}/edit`)}>
+              Edit
+            </button>
+            <button onClick={() => navigate("/users")}>
+              Back to list
+            </button>
+          </div>
+        </div>
 
-      <p>
-        <strong>Id:</strong> {user.id}
-      </p>
-      <p>
-        <strong>Name:</strong> {user.name}
-      </p>
-      <p>
-        <strong>Email:</strong> {user.email}
-      </p>
-      <p>
-        <strong>Role:</strong> {user.role}
-      </p>
+        <div className="detail-header">
+          <div>
+            <div className="detail-id">#{user.id}</div>
+            <h3 className="detail-title">{user.name}</h3>
+          </div>
 
-      <div style={{ marginTop: "8px" }}>
-        <span>Change role: </span>
-        <button
-          disabled={patching}
-          onClick={() => handleRoleChange("Responder")}
-        >
-          Responder
-        </button>{" "}
-        <button
-          disabled={patching}
-          onClick={() => handleRoleChange("Dispatcher")}
-        >
-          Dispatcher
-        </button>{" "}
-        <button
-          disabled={patching}
-          onClick={() => handleRoleChange("Admin")}
-        >
-          Admin
-        </button>
-      </div>
+          <span
+            className={
+              "status-chip " +
+              (user.role === "Responder"
+                ? "status-chip-open"
+                : user.role === "Dispatcher"
+                ? "status-chip-inprogress"
+                : "status-chip-resolved")
+            }
+          >
+            {user.role}
+          </span>
+        </div>
 
-      <div style={{ marginTop: "12px" }}>
-        <button onClick={() => navigate(`/users/${id}/edit`)}>Edit</button>{" "}
-        <button onClick={() => navigate("/users")}>Back to list</button>
+        <div className="detail-body">
+          <div className="detail-row">
+            <span className="detail-label">Email</span>
+            <span className="detail-value">{user.email}</span>
+          </div>
+        </div>
+
+        <div className="detail-status-section">
+          <span className="detail-label">Change role</span>
+          <div className="status-chip-group">
+            <button
+              type="button"
+              disabled={patching}
+              className={
+                "status-chip status-chip-open" +
+                (user.role === "Responder" ? " status-chip-active" : "")
+              }
+              onClick={() => handleRoleChange("Responder")}
+            >
+              Responder
+            </button>
+            <button
+              type="button"
+              disabled={patching}
+              className={
+                "status-chip status-chip-inprogress" +
+                (user.role === "Dispatcher" ? " status-chip-active" : "")
+              }
+              onClick={() => handleRoleChange("Dispatcher")}
+            >
+              Dispatcher
+            </button>
+            <button
+              type="button"
+              disabled={patching}
+              className={
+                "status-chip status-chip-resolved" +
+                (user.role === "Admin" ? " status-chip-active" : "")
+              }
+              onClick={() => handleRoleChange("Admin")}
+            >
+              Admin
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

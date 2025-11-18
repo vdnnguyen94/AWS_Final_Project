@@ -1,21 +1,31 @@
-/*import axiosClient from "./axiosClient";
+// ===== Real incidentsApi (for backend connection) =====
+import axiosClient from "./axiosClient";
 
 const incidentsApi = {
+  // GET /api/incidents
   getAll: () => axiosClient.get("/api/incidents"),
+
+  // GET /api/incidents/{id}
   getById: (id) => axiosClient.get(`/api/incidents/${id}`),
+
+  // POST /api/incidents
   create: (data) => axiosClient.post("/api/incidents", data),
+
+  // PUT /api/incidents/{id}
   update: (id, data) => axiosClient.put(`/api/incidents/${id}`, data),
+
+  // PATCH /api/incidents/{id}
+  // body: { status: "Open" | "InProgress" | "Resolved" }
   patchStatus: (id, status) =>
     axiosClient.patch(`/api/incidents/${id}`, { status }),
+
+  // DELETE /api/incidents/{id}
   delete: (id) => axiosClient.delete(`/api/incidents/${id}`),
 };
 
-export default incidentsApi;*/
+export default incidentsApi;
 
-/* ------------------- Mock incidentApi ------------------- */
-import axiosClient from "./axiosClient";
-
-const useMock = import.meta.env.VITE_USE_MOCK_API === "true";
+/*/ ===== Mock incidentsApi (for frontend testing) =====
 
 let mockIncidents = [
   {
@@ -34,15 +44,64 @@ let mockIncidents = [
     latitude: 43.7001,
     longitude: -79.4163,
   },
+  {
+    id: 3,
+    title: "Highway collision",
+    description: "Multi-vehicle collision reported on Highway 401.",
+    status: "Open",
+    latitude: 43.7735,
+    longitude: -79.3358,
+  },
+  {
+    id: 4,
+    title: "Subway service disruption",
+    description: "Signal issue causing major delays on Line 1.",
+    status: "Resolved",
+    latitude: 43.7625,
+    longitude: -79.4111,
+  },
+  {
+    id: 5,
+    title: "Industrial fire",
+    description: "Smoke reported from an industrial area in Mississauga.",
+    status: "InProgress",
+    latitude: 43.606,
+    longitude: -79.6505,
+  },
+  {
+    id: 6,
+    title: "Residential gas leak",
+    description: "Gas smell reported in a residential building.",
+    status: "Open",
+    latitude: 43.688,
+    longitude: -79.296,
+  },
+  {
+    id: 7,
+    title: "Road closure for event",
+    description: "Downtown street closed due to a public event.",
+    status: "Resolved",
+    latitude: 43.647,
+    longitude: -79.381,
+  },
+  {
+    id: 8,
+    title: "Traffic signal outage",
+    description: "Traffic lights not working at major intersection.",
+    status: "Open",
+    latitude: 43.725,
+    longitude: -79.452,
+  },
 ];
 
-let mockNextId = 3;
+let mockNextId = 9;
 
 const delay = (data, ms = 300) =>
   new Promise((resolve) => setTimeout(() => resolve({ data }), ms));
 
-const mockIncidentsApi = {
+const incidentsApi = {
   getAll: () => delay([...mockIncidents]),
+
   getById: (id) =>
     delay(mockIncidents.find((i) => i.id === Number(id)) ?? null),
 
@@ -52,9 +111,16 @@ const mockIncidentsApi = {
       title: data.title,
       description: data.description,
       status: data.status ?? "Open",
-      latitude: data.latitude ?? null,
-      longitude: data.longitude ?? null,
+      latitude:
+        data.latitude !== undefined && data.latitude !== null
+          ? Number(data.latitude)
+          : null,
+      longitude:
+        data.longitude !== undefined && data.longitude !== null
+          ? Number(data.longitude)
+          : null,
     };
+
     mockIncidents.push(newItem);
     return delay(newItem);
   },
@@ -63,11 +129,25 @@ const mockIncidentsApi = {
     const index = mockIncidents.findIndex((i) => i.id === Number(id));
     if (index === -1) return delay(null);
 
-    mockIncidents[index] = {
+    const updated = {
       ...mockIncidents[index],
       ...data,
-      id: mockIncidents[index].id,
     };
+
+    if (data.latitude !== undefined) {
+      updated.latitude =
+        data.latitude !== null && data.latitude !== ""
+          ? Number(data.latitude)
+          : null;
+    }
+    if (data.longitude !== undefined) {
+      updated.longitude =
+        data.longitude !== null && data.longitude !== ""
+          ? Number(data.longitude)
+          : null;
+    }
+
+    mockIncidents[index] = updated;
     return delay(mockIncidents[index]);
   },
 
@@ -88,17 +168,5 @@ const mockIncidentsApi = {
   },
 };
 
-// Real API implementation (will be used when backend is ready)
-const realIncidentsApi = {
-  getAll: () => axiosClient.get("/api/incidents"),
-  getById: (id) => axiosClient.get(`/api/incidents/${id}`),
-  create: (data) => axiosClient.post("/api/incidents", data),
-  update: (id, data) => axiosClient.put(`/api/incidents/${id}`, data),
-  patchStatus: (id, status) =>
-    axiosClient.patch(`/api/incidents/${id}`, { status }),
-  delete: (id) => axiosClient.delete(`/api/incidents/${id}`),
-};
-
-const incidentsApi = useMock ? mockIncidentsApi : realIncidentsApi;
-
 export default incidentsApi;
+*/
