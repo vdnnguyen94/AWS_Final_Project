@@ -47,11 +47,11 @@ INSERT INTO dbo.Users (Name, Email, Role) VALUES
 (N'Ali Khan',        'ali.khan@email.com',         N'Responder'),
 (N'Maria Garcia',    'maria.garcia@email.com',     N'Responder'),
 (N'Lee Minji',       'minji.lee@email.com',        N'Responder'),
+(N'Noah Wilson',     'noah.wilson@email.com',      N'Responder'),
 (N'Chloe Kim',       'chloe.kim@email.com',        N'Admin'),
 (N'Sarah Johnson',   'sarah.johnson@email.com',    N'Admin'),
 (N'David Wong',      'david.wong@email.com',       N'Dispatcher'),
-(N'Emma Brown',      'emma.brown@email.com',       N'Dispatcher'),
-(N'Noah Wilson',     'noah.wilson@email.com',      N'Viewer');
+(N'Emma Brown',      'emma.brown@email.com',       N'Dispatcher');
 GO
 
 
@@ -101,7 +101,7 @@ CREATE TABLE dbo.Media (
 );
 GO
 
--- Seed Data (10 rows, improved real-like S3 URLs)
+-- Seed Data (10 rows)
 INSERT INTO dbo.Media (IncidentId, Url, Description)
 VALUES
 (1, 'https://rescuelink-media.s3.amazonaws.com/flood/flood_area_1.jpg',         'Flood area - bridge submerged'),
