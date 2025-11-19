@@ -1,14 +1,14 @@
 # 📘 RescueLink Frontend – README
 
 A complete React (Vite) frontend application for the **RescueLink Disaster Reporting System**.
-This frontend communicates with a REST API and provides UI screens for:
+This frontend communicates with a REST API (or an internal Mock API) and provides UI screens for:
 
-* Incidents
-* Users
-* Media (uploads)
-* Google Maps visualization
+* **Incidents (CRUD + Patch Status)**
+* **Users (CRUD + Patch Role)**
+* **Media (Upload / Edit / Preview / Delete)**
+* **Google Maps visualization for incident locations**
 
-The goal is to offer a clean UI that demonstrates all REST operations (GET, POST, PUT, PATCH, DELETE).
+The UI demonstrates all REST operations (GET, POST, PUT, PATCH, DELETE) and supports switching between **Mock API** and **Real Backend API**.
 
 ---
 
@@ -19,6 +19,7 @@ The goal is to offer a clean UI that demonstrates all REST operations (GET, POST
 * **Axios** (API communication)
 * **@react-google-maps/api** (Map integration)
 * **CSS Modules / Basic Styling**
+* **Mock API for local development**
 
 ---
 
@@ -54,15 +55,19 @@ VITE_API_BASE_URL=https://localhost:7123
 
 # Google Maps API Key
 VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
+
+# Toggle Mock API (true = use mock / false = real backend)
+VITE_USE_MOCK_API=true
 ```
 
 > ⚠️ Must be `.env.local`
 > ⚠️ All variables are accessed via `import.meta.env.*`
+> **`VITE_USE_MOCK_API=true`** → all API calls use the internal mock backend
+> **`VITE_USE_MOCK_API=false`** → uses your real ASP.NET backend
 
 ---
 
 ## ▶️ 4. Run the App
-
 Start the development server:
 
 ```bash
@@ -98,14 +103,15 @@ src/
 │   │
 │   ├── Media/
 │   │   ├── MediaList.jsx
-│   │   └── MediaUpload.jsx
+│   │   ├── MediaUpload.jsx
+│   │   ├── MediaDetail.jsx
+│   │   └── MediaForm.jsx
 │   │
 │   └── Map/
 │       └── IncidentMap.jsx
 │
 ├── App.jsx
 ├── App.css
-├── index.css
 └── main.jsx
 ```
 
