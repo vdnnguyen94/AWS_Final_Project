@@ -60,10 +60,11 @@ VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
 VITE_USE_MOCK_API=true
 ```
 
-> ⚠️ Must be `.env.local`
-> ⚠️ All variables are accessed via `import.meta.env.*`
-> **`VITE_USE_MOCK_API=true`** → all API calls use the internal mock backend
-> **`VITE_USE_MOCK_API=false`** → uses your real ASP.NET backend
+Notes:
+* ⚠️ Must be `.env.local`
+* ⚠️ All variables are accessed via `import.meta.env.*`
+* **`VITE_USE_MOCK_API=true`** → all API calls use the internal mock backend
+* **`VITE_USE_MOCK_API=false`** → uses your real ASP.NET backend
 
 ---
 
