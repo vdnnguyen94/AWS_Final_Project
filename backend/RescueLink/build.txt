@@ -1,0 +1,4 @@
+cd backend/RescueLink
+docker build -t rescuelink-backend -f RescueLink.Api/Dockerfile .
+docker tag rescuelink-backend:latest 260758034703.dkr.ecr.us-east-2.amazonaws.com/rescuelink-backend:latest
+docker push 260758034703.dkr.ecr.us-east-2.amazonaws.com/rescuelink-backend:latest
