@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendCors", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -70,7 +70,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 // Serve static files for uploaded media (e.g., /uploads)
 app.UseStaticFiles();
