@@ -5,7 +5,15 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+
+        "RDS_HOST": "rescuelink-db.cdo8mgokw76q.us-east-2.rds.amazonaws.com",
+        "RDS_DB": "rescuelink-db",
+        "RDS_USER": "admin",
+        "RDS_PWD": "admin1234",
+
+        "DYNAMODB_TABLE": "Incidents",
+        "S3_BUCKET": "rescuelink-media-uploads"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5187"
@@ -15,7 +23,15 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+
+        "RDS_HOST": "rescuelink-db.cdo8mgokw76q.us-east-2.rds.amazonaws.com",
+        "RDS_DB": "rescuelink-db",
+        "RDS_USER": "admin",
+        "RDS_PWD": "admin1234",
+
+        "DYNAMODB_TABLE": "Incidents",
+        "S3_BUCKET": "rescuelink-media-uploads"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7165;http://localhost:5187"
