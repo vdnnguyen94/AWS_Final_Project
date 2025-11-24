@@ -1,17 +1,19 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RescueLink.API.Data;
 using RescueLink.API.Middlewares;
 using RescueLink.API.Repositories;
 using RescueLink.API.Repositories.Sql;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// 2. Load the .env file immediately
+Env.Load();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS for frontend
+// CORS: Allow any origin (for local dev + cloud frontend)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendCors", policy =>
@@ -23,15 +25,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-//
-// Database (SQL Server / RDS)
-// Prefer RDS_* environment variables (from env file / ECS),
-// fall back to local appsettings / dev defaults.
-//
+// ---------------------------------------------------------
+// Database Configuration (Environment Variables Priority)
+// ---------------------------------------------------------
 var rdsHost = Environment.GetEnvironmentVariable("RDS_HOST");
-var rdsDb   = Environment.GetEnvironmentVariable("RDS_DB");
+var rdsDb = Environment.GetEnvironmentVariable("RDS_DB");
 var rdsUser = Environment.GetEnvironmentVariable("RDS_USER");
-var rdsPwd  = Environment.GetEnvironmentVariable("RDS_PWD");
+var rdsPwd = Environment.GetEnvironmentVariable("RDS_PWD");
 
 string connectionString;
 
@@ -40,28 +40,63 @@ if (!string.IsNullOrWhiteSpace(rdsHost) &&
     !string.IsNullOrWhiteSpace(rdsUser) &&
     !string.IsNullOrWhiteSpace(rdsPwd))
 {
-    // Shared RDS used by the team (what your teammate expects)
-    connectionString =
-        $"Server={rdsHost},1433;Database={rdsDb};User Id={rdsUser};Password={rdsPwd};Encrypt=True;TrustServerCertificate=True";
+    // Production / Docker (Env Vars exist)
+    connectionString = $"Server={rdsHost},1433;Database={rdsDb};User Id={rdsUser};Password={rdsPwd};Encrypt=True;TrustServerCertificate=True";
 }
 else
 {
-    // Local dev fallbacks
-    connectionString =
-        builder.Configuration.GetConnectionString("RescueLinkDb")
-        ?? builder.Configuration["RDS_CONNECTION_STRING"]
+    // Local Development Fallback (appsettings.json)
+    connectionString = builder.Configuration.GetConnectionString("RescueLinkDb")
         ?? "Server=localhost;Database=RescueLinkDb;Trusted_Connection=True;TrustServerCertificate=True";
 }
 
 builder.Services.AddDbContext<RescueLinkDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Repositories
+// Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
 builder.Services.AddScoped<IMediaRepository, MediaRepository>();
 
 var app = builder.Build();
+
+// ---------------------------------------------------------
+// 🚀 STARTUP CONNECTION CHECK
+// ---------------------------------------------------------
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.WriteLine($"\n--------------------------------------------------");
+Console.WriteLine($"Launching in Environment: {app.Environment.EnvironmentName}");
+Console.WriteLine($"--------------------------------------------------");
+Console.ResetColor();
+
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<RescueLinkDbContext>();
+        Console.Write("Testing Database Connection... ");
+
+        if (db.Database.CanConnect())
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("SUCCESS!");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("FAILED (CanConnect returned false)");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"ERROR: {ex.Message}");
+    }
+    Console.ResetColor();
+    Console.WriteLine($"--------------------------------------------------\n");
+}
+// ---------------------------------------------------------
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -70,15 +105,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Keep disabled for this setup
 
-// Serve static files for uploaded media (e.g., /uploads)
 app.UseStaticFiles();
 
-// CORS
 app.UseCors("FrontendCors");
 
-// API key middleware (x-api-key)
 app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseAuthorization();
