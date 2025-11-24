@@ -121,8 +121,8 @@ function IncidentList() {
           </thead>
           <tbody>
             {filteredIncidents.map((inc) => (
-              <tr key={inc.id}>
-                <td>{inc.id}</td>
+                <tr key={inc.incidentID || inc.IncidentID}> 
+                <td>{inc.incidentID || inc.IncidentID}</td>
                 <td>{inc.title}</td>
                 <td>{inc.status}</td>
                 <td>{inc.latitude}</td>

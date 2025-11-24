@@ -4,10 +4,27 @@ using RescueLink.API.Middlewares;
 using RescueLink.API.Repositories;
 using RescueLink.API.Repositories.Sql;
 using DotNetEnv;
+using Amazon.S3;
+using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
 // 2. Load the .env file immediately
 Env.Load();
+// 1. Get AWS Credentials from .env
+var awsKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+var awsSecret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION");
+var awsOptions = new Amazon.Extensions.NETCore.Setup.AWSOptions
+{
+    Credentials = new BasicAWSCredentials(awsKey, awsSecret),
+    Region = Amazon.RegionEndpoint.GetBySystemName(awsRegion)
+};
+
+// 2. Register AWS Services
+builder.Services.AddDefaultAWSOptions(awsOptions);
+builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddAWSService<IAmazonDynamoDB>();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,8 +72,7 @@ builder.Services.AddDbContext<RescueLinkDbContext>(options =>
 
 // Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
-builder.Services.AddScoped<IMediaRepository, MediaRepository>();
+
 
 var app = builder.Build();
 

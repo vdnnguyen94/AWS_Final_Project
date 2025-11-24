@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using RescueLink.API.DTOs;
 using RescueLink.API.Models;
-using RescueLink.API.Repositories;
 
 namespace RescueLink.API.Controllers
 {
@@ -9,173 +10,51 @@ namespace RescueLink.API.Controllers
     [Route("api/[controller]")]
     public class IncidentsController : ControllerBase
     {
-        private readonly IIncidentRepository _repository;
+        private readonly IDynamoDBContext _dynamoContext;
 
-        public IncidentsController(IIncidentRepository repository)
+        public IncidentsController(IAmazonDynamoDB dynamoDbClient)
         {
-            _repository = repository;
+            _dynamoContext = new DynamoDBContext(dynamoDbClient);
         }
 
         // GET /api/incidents
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<IncidentResponseDto>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var incidents = await _repository.GetAllAsync();
-            var result = incidents.Select(i => new IncidentResponseDto
-            {
-                Id = i.Id,
-                Title = i.Title,
-                Description = i.Description,
-                Latitude = i.Latitude,
-                Longitude = i.Longitude,
-                Status = i.Status,
-                CreatedAt = i.CreatedAt
-            });
-
-            return Ok(result);
+            // Scan DynamoDB for all incidents
+            var conditions = new List<ScanCondition>();
+            var incidents = await _dynamoContext.ScanAsync<Incident>(conditions).GetRemainingAsync();
+            return Ok(incidents);
         }
 
         // GET /api/incidents/{id}
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
         {
-            var incident = await _repository.GetByIdAsync(id);
-            if (incident == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Error = "NotFound",
-                    Message = "Incident not found."
-                });
-            }
-
-            var dto = new IncidentResponseDto
-            {
-                Id = incident.Id,
-                Title = incident.Title,
-                Description = incident.Description,
-                Latitude = incident.Latitude,
-                Longitude = incident.Longitude,
-                Status = incident.Status,
-                CreatedAt = incident.CreatedAt
-            };
-
-            return Ok(dto);
+            var incident = await _dynamoContext.LoadAsync<Incident>(id);
+            if (incident == null) return NotFound();
+            return Ok(incident);
         }
 
         // POST /api/incidents
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] IncidentCreateDto dto)
         {
-            if (!ModelState.IsValid)
+            var newIncident = new Incident
             {
-                return BadRequest(new ErrorResponse
-                {
-                    Error = "BadRequest",
-                    Message = "Invalid incident payload."
-                });
-            }
-
-            var entity = new Incident
-            {
+                IncidentID = Guid.NewGuid().ToString(),
                 Title = dto.Title,
                 Description = dto.Description,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
                 Status = "Open",
-                CreatedAt = DateTime.UtcNow
+                ReportedAt = DateTime.UtcNow
             };
 
-            var created = await _repository.CreateAsync(entity);
-
-            var response = new IncidentResponseDto
-            {
-                Id = created.Id,
-                Title = created.Title,
-                Description = created.Description,
-                Latitude = created.Latitude,
-                Longitude = created.Longitude,
-                Status = created.Status,
-                CreatedAt = created.CreatedAt
-            };
-
-            return StatusCode(StatusCodes.Status201Created, response);
+            await _dynamoContext.SaveAsync(newIncident);
+            return CreatedAtAction(nameof(GetById), new { id = newIncident.IncidentID }, newIncident);
         }
 
-        // PUT /api/incidents/{id}
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Replace(int id, [FromBody] IncidentUpdateDto dto)
-        {
-            var existing = await _repository.GetByIdAsync(id);
-            if (existing == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Error = "NotFound",
-                    Message = "Incident not found."
-                });
-            }
-
-            existing.Title = dto.Title;
-            existing.Description = dto.Description;
-            existing.Latitude = dto.Latitude;
-            existing.Longitude = dto.Longitude;
-            existing.Status = dto.Status;
-
-            var updated = await _repository.UpdateAsync(existing);
-
-            var response = new IncidentResponseDto
-            {
-                Id = updated!.Id,
-                Title = updated.Title,
-                Description = updated.Description,
-                Latitude = updated.Latitude,
-                Longitude = updated.Longitude,
-                Status = updated.Status,
-                CreatedAt = updated.CreatedAt
-            };
-
-            return Ok(response);
-        }
-
-        // PATCH /api/incidents/{id}
-        [HttpPatch("{id:int}")]
-        public async Task<IActionResult> PatchStatus(int id, [FromBody] IncidentPatchStatusDto dto)
-        {
-            var updated = await _repository.UpdateStatusAsync(id, dto.Status);
-            if (updated == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Error = "NotFound",
-                    Message = "Incident not found."
-                });
-            }
-
-            var response = new IncidentStatusResponseDto
-            {
-                Id = updated.Id,
-                Status = updated.Status
-            };
-
-            return Ok(response);
-        }
-
-        // DELETE /api/incidents/{id}
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var ok = await _repository.DeleteAsync(id);
-            if (!ok)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Error = "NotFound",
-                    Message = "Incident not found."
-                });
-            }
-
-            return NoContent();
-        }
+        // Implement PUT/DELETE similarly using SaveAsync and DeleteAsync
     }
 }
