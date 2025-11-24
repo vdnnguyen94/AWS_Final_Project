@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react';
 import { Routes, Route, NavLink, Link } from "react-router-dom";
-import axiosClient from './api/axiosClient'; // Import your axios client
 import "./App.css";
 
-// Import your pages
 import IncidentList from "./pages/Incidents/IncidentList.jsx";
 import IncidentDetail from "./pages/Incidents/IncidentDetail.jsx";
 import IncidentForm from "./pages/Incidents/IncidentForm.jsx";
@@ -20,46 +17,14 @@ import MediaForm from "./pages/Media/MediaForm.jsx";
 import IncidentMap from "./pages/Map/IncidentMap.jsx";
 
 function App() {
-  // 1. State for API Status
-  const [apiStatus, setApiStatus] = useState("Checking connection...");
-
-  // 2. Check connection on load
-  useEffect(() => {
-    axiosClient.get('/api/status') // Ensure this matches the endpoint you just tested
-      .then(response => {
-        // If your API returns { message: "..." } use response.data.message
-        // If it returns just a string, use response.data
-        setApiStatus(response.data.message || "Connected!");
-      })
-      .catch(error => {
-        console.error(error);
-        setApiStatus("Error connecting to API ❌");
-      });
-  }, []);
-
   return (
     <div className="app-root">
       <header className="app-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <h1>
-            <Link to="/" className="home-title-link">
-              RescueLink
-            </Link>
-          </h1>
-          
-          {/* 3. Display API Status in the Header */}
-          <span style={{ 
-            fontSize: '0.9rem', 
-            fontWeight: 'bold',
-            color: apiStatus.includes("Error") ? '#ff6b6b' : '#51cf66',
-            border: '1px solid',
-            padding: '2px 8px',
-            borderRadius: '4px'
-          }}>
-            API: {apiStatus}
-          </span>
-        </div>
-
+        <h1>
+          <Link to="/" className="home-title-link">
+            RescueLink
+          </Link>
+        </h1>
         <nav>
           <NavLink to="/incidents">Incidents</NavLink>
           <NavLink to="/users">Users</NavLink>
